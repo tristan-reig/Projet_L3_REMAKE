@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Principal - IA Créative</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='dist/output.css')}}">
+</head>
+<body>
+    <main class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl w-full">
+
+            <a href="{{ url_for('classifier') }}" class="group">
+                <div class="h-full p-6 bg-white border border-gray-200 rounded-lg shadow transition-all duration-300 transform group-hover:scale-105 group-hover:shadow-xl group-hover:border-blue-400">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 text-center">
+                        Classifieur
+                    </h5>
+                    <div class="w-full overflow-hidden rounded mb-4">
+                        <img class="w-full h-full object-cover" src="{{url_for('static',filename='img/Animals.jpg')}}" alt="Chiens et chats">
+                    </div>
+                    <p class="font-normal text-gray-700 text-center">
+                        Identifier si une image contient un chien ou un chat grâce à l'IA.
+                    </p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('coloriseur') }}" class="group">
+                <div class="h-full p-6 bg-white border border-gray-200 rounded-lg shadow transition-all duration-300 transform group-hover:scale-105 group-hover:shadow-xl group-hover:border-green-400">
+                    <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 text-center">
+                        Coloriseur
+                    </h5>
+                    <div class="w-full overflow-hidden rounded mb-4">
+                        <img class="w-full h-full object-cover" src="https://img.freepik.com/premium-photo/creative-botanical-illustration-with-vibrant-colors-abstract-design_785853-15691.jpg?semt=ais_hybrid&w=740&q=80" alt="Colorisation">
+                    </div>
+                    <p class="font-normal text-gray-700 text-center">
+                        Passer d'une image en noir et blanc à une image en couleur.
+                    </p>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classifier</title>
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="{{ url_for('index') }}" class="back-button" title="Retour">
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="40" y1="25" x2="10" y2="25"></line>
+                <polyline points="25 35 10 25 25 15"></polyline>
+                <circle r="20" cx="25" cy="25" fill="none" stroke="black" stroke-width="2"/>
+            </svg>
+        </a>
+        <h1>Classifieur d'Images</h1>
+        <div style="width: 45px;"></div> 
+    </header>
+    
+    <form id="upload-form" action="{{ url_for('class_predict') }}" method="POST" enctype="multipart/form-data">
+    <div id="drop-zone" class="drop-zone">
+        Glissez-déposez un fichier ici
+    </div>
+
+    <div id="preview-container" style="display: none;">
+        <img id="preview-img" src="" alt="Aperçu">
+    </div>
+
+    <input type="file" id="file-input" name="file" accept="image/*" style="display: none;">
+    <div class="radio-group" id="radiobox" style="display : none;">
+        <input type="radio" id="model-T" name="model-select" value="pets">
+        <label for="model-T">Modèle Cats/Dogs</label>
+        <input type="radio" id="model-I" name="model-select" value="cars">
+        <label for="model-I">Modèle Cars/Planes</label>
+    </div>
+    <div class="button-group" id="button-g" style="display : none;">
+        <button type="submit" id="submit-btn">Envoyer</button>
+        <button type="button" id="delete-btn">Supprimer l'image</button>
+    </div>
+</form>
+    <script src="{{ url_for('static', filename='js/script_classifier.js') }}" type="module"></script>
+</body>
+</html>

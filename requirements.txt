@@ -1,0 +1,11 @@
+Flask
+keras
+tensorflow
+matplotlib
+pydot
+scikit-learn
+numpy
+scikit-image
+Pillow
+tensorflow-datasets
+kagglehub
