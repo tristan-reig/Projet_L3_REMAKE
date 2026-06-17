@@ -1,0 +1,34 @@
+[project]
+name = "projet-l3-remake"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+dependencies = [
+    # ML — Keras 3 multi-backend, on cible JAX
+    "keras>=3.6",
+    "jax>=0.4.34",
+    "jaxlib>=0.4.34",
+    # Traitement d'images & données
+    "numpy>=1.26",
+    "pillow>=10.4",
+    "opencv-python-headless>=4.10",
+    "scikit-image>=0.24",
+    # Backend web
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "python-multipart>=0.0.12",
+]
+ 
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+    "ipykernel>=7.3.0",
+    "matplotlib>=3.9",
+]
+ 
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+ 
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

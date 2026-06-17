@@ -1,29 +1,38 @@
-# Environnements Python
-venv/
-.env/
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.python-version
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
 
-# Datasets
-PetImages/
+# uv
+.uv/
 
-# Logs / training artifacts
-*.log
-*.csv
-*.json
+# Données locales (datasets non versionnés)
+data/
+!data/.gitkeep
 
-# Node
+# Node / frontend
 node_modules/
-package-lock.json
-npm-debug.log*
+frontend/dist/
+frontend/static/css/output.css
 
-# Build frontend
-static/dist/
-dist/
-build/
+# Environnement & secrets
+.env
+.env.local
 
-# CSS output
-static/dist/output.css
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Logs & checkpoints d'entraînement temporaires
+logs/
+checkpoints/
+*.log
