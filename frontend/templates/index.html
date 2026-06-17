@@ -3,132 +3,99 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IA Créative — classer, coloriser, générer</title>
+  <title>Refonte Projet L3 — Vision par ordinateur</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Expanded:wght@700;800&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/theme.css" />
   <script>
     tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            display: ['"Archivo Expanded"', 'Archivo', 'sans-serif'],
-            sans: ['Archivo', 'system-ui', 'sans-serif'],
-            mono: ['"Spline Sans Mono"', 'monospace'],
-          },
-          colors: {
-            ink: '#16161a',
-            paper: '#f3f2ee',
-            mist: '#d9d7cf',
-          },
+      theme: { extend: {
+        fontFamily: {
+          sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+          mono: ['"Space Mono"', 'monospace'],
         },
-      },
+        colors: { night: '#070912', ink: '#0d1020', fg: '#eef0fb', muted: '#8b90b5' },
+      } },
     };
   </script>
-  <style>
-    @media (prefers-reduced-motion: no-preference) {
-      .reveal { opacity: 0; transform: translateY(16px); transition: opacity .7s ease, transform .7s ease; }
-      .reveal.in { opacity: 1; transform: none; }
-    }
-    /* Signature : la "colorisation" — gris au repos, couleur au survol */
-    .chroma { filter: grayscale(1); transition: filter .6s ease; }
-    .chroma:hover { filter: grayscale(0); }
-    .grain { background-image: radial-gradient(#00000008 1px, transparent 1px); background-size: 4px 4px; }
-  </style>
 </head>
-<body class="bg-paper text-ink font-sans antialiased grain">
+<body class="text-fg font-sans antialiased min-h-screen flex flex-col relative">
 
-  <!-- Nav -->
-  <header class="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
-    <span class="font-mono text-sm tracking-tight">ia-creative<span class="text-ink/40">/v0.1</span></span>
-    <nav class="font-mono text-xs uppercase tracking-widest text-ink/60 flex gap-6">
-      <a href="#objectifs" class="hover:text-ink transition">Objectifs</a>
-      <a href="#pipeline" class="hover:text-ink transition">Pipeline</a>
-    </nav>
-  </header>
+  <div class="mesh" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  </div>
 
-  <!-- Hero -->
-  <main class="max-w-6xl mx-auto px-6">
-    <section class="pt-16 pb-24 md:pt-24">
-      <p class="reveal font-mono text-xs uppercase tracking-[0.3em] text-ink/50 mb-6">
-        Deep learning · Keras 3 · JAX
-      </p>
-      <h1 class="reveal font-display font-extrabold leading-[0.95] text-5xl md:text-7xl lg:text-8xl max-w-4xl">
-        Apprendre aux<br />machines à
-        <span class="chroma bg-gradient-to-r from-rose-500 via-amber-400 to-sky-500 bg-clip-text text-transparent">voir</span>,
-        réparer<br />et inventer des images.
-      </h1>
-      <p class="reveal mt-8 max-w-xl text-lg text-ink/70">
-        Un parcours en trois temps : reconnaître ce qu'une image contient,
-        restaurer ce qu'elle a perdu, puis générer des formes qui n'existaient pas.
-      </p>
-      <div class="reveal mt-10 flex flex-wrap gap-3 font-mono text-sm">
-        <a href="#objectifs" class="px-5 py-2.5 bg-ink text-paper rounded-full hover:bg-ink/85 transition">Voir les objectifs</a>
-        <a href="/docs" class="px-5 py-2.5 border border-ink/20 rounded-full hover:border-ink/50 transition">Explorer l'API</a>
-      </div>
-    </section>
+  <div class="relative z-10 flex flex-col min-h-screen">
+    <main class="max-w-5xl w-full mx-auto px-6 flex-1">
+      <section class="pt-24 pb-16">
+        <h1 class="font-semibold text-4xl md:text-6xl leading-[1.02] tracking-tight max-w-4xl">
+          Refonte Projet L3
+        </h1>
+        <p class="mt-4 text-xl md:text-2xl font-medium bg-gradient-to-r from-indigo-400 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent">
+          Premiers pas en Vision par Ordinateur &amp; Réseaux de Neurones
+        </p>
+        <p class="mt-7 max-w-xl text-lg text-muted leading-relaxed">
+          Implémentation et entraînement de modèles d'intelligence artificielle pour
+          classifier, restaurer et générer des données visuelles.
+        </p>
+      </section>
 
-    <!-- Objectifs -->
-    <section id="objectifs" class="py-16 border-t border-ink/10">
-      <h2 class="font-display text-2xl font-bold mb-10">Quatre objectifs, une progression</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-px bg-ink/10 rounded-2xl overflow-hidden">
-        <article class="reveal bg-paper p-7">
-          <span class="font-mono text-xs text-ink/40">01 · classer</span>
-          <h3 class="font-display text-xl font-bold mt-3">Classifieur</h3>
-          <p class="mt-2 text-sm text-ink/65">Identifier la catégorie d'une image. Les bases de la vision profonde.</p>
-          <span class="inline-block mt-4 text-xs font-mono px-2 py-1 bg-amber-400/20 text-amber-700 rounded">en refonte</span>
-        </article>
-        <article class="reveal bg-paper p-7">
-          <span class="font-mono text-xs text-ink/40">02 · restaurer</span>
-          <h3 class="font-display text-xl font-bold mt-3">Coloriseur</h3>
-          <p class="mt-2 text-sm text-ink/65">Redonner ses couleurs à une image en noir et blanc.</p>
-          <span class="inline-block mt-4 text-xs font-mono px-2 py-1 bg-emerald-500/20 text-emerald-700 rounded">opérationnel</span>
-        </article>
-        <article class="reveal bg-paper p-7">
-          <span class="font-mono text-xs text-ink/40">03 · restaurer</span>
-          <h3 class="font-display text-xl font-bold mt-3">Débruiteur</h3>
-          <p class="mt-2 text-sm text-ink/65">Reconstruire une image altérée, supprimer le bruit.</p>
-          <span class="inline-block mt-4 text-xs font-mono px-2 py-1 bg-ink/10 text-ink/50 rounded">à venir</span>
-        </article>
-        <article class="reveal bg-paper p-7">
-          <span class="font-mono text-xs text-ink/40">04 · générer</span>
-          <h3 class="font-display text-xl font-bold mt-3">Génération</h3>
-          <p class="mt-2 text-sm text-ink/65">Autoencodeurs et VAE : créer des images depuis l'espace latent.</p>
-          <span class="inline-block mt-4 text-xs font-mono px-2 py-1 bg-ink/10 text-ink/50 rounded">à venir</span>
-        </article>
-      </div>
-    </section>
+      <section class="pb-24">
+        <div class="grid sm:grid-cols-2 gap-4">
 
-    <!-- Pipeline -->
-    <section id="pipeline" class="py-16 border-t border-ink/10">
-      <h2 class="font-display text-2xl font-bold mb-3">De l'image au latent</h2>
-      <p class="text-ink/65 max-w-xl mb-10">Le même fil conducteur traverse les quatre étapes : un réseau apprend une représentation interne des images, puis s'en sert pour décider, réparer ou créer.</p>
-      <div class="flex flex-wrap items-center gap-3 font-mono text-sm">
-        <span class="px-4 py-2 bg-ink text-paper rounded-lg">image</span>
-        <span class="text-ink/30">→</span>
-        <span class="px-4 py-2 border border-ink/20 rounded-lg">encodeur</span>
-        <span class="text-ink/30">→</span>
-        <span class="px-4 py-2 border border-ink/20 rounded-lg chroma bg-gradient-to-r from-rose-400/30 to-sky-400/30 rounded-lg">latent</span>
-        <span class="text-ink/30">→</span>
-        <span class="px-4 py-2 border border-ink/20 rounded-lg">décodeur</span>
-        <span class="text-ink/30">→</span>
-        <span class="px-4 py-2 bg-ink text-paper rounded-lg">résultat</span>
-      </div>
-    </section>
-  </main>
+          <div class="glass off rounded-2xl p-6">
+            <div class="flex items-center justify-between font-mono text-[11px] tracking-widest">
+              <span class="text-muted">01 · CLASSIFY</span>
+              <span class="text-amber-300">● refonte</span>
+            </div>
+            <div class="mt-5 h-28 w-full rounded-xl bg-white/5 border border-white/10"></div>
+            <h2 class="text-2xl font-semibold mt-5">Classer</h2>
+            <p class="mt-2 text-sm text-muted leading-relaxed">Identifie la catégorie d'une image. En cours de réentraînement.</p>
+            <span class="inline-block mt-4 font-mono text-sm text-muted">indisponible</span>
+          </div>
 
-  <footer class="max-w-6xl mx-auto px-6 py-10 border-t border-ink/10 font-mono text-xs text-ink/40 flex flex-wrap justify-between gap-4">
-    <span>Reprise du projet L3 · 2026</span>
-    <span>Keras 3 · JAX · FastAPI</span>
-  </footer>
+          <a href="/colorizer" class="glass live group rounded-2xl p-6 block">
+            <div class="flex items-center justify-between font-mono text-[11px] tracking-widest">
+              <span class="text-muted">02 · COLORIZE</span>
+              <span class="text-emerald-300">● prêt</span>
+            </div>
+            <div class="mt-5 h-28 w-full rounded-xl thumb-colorize"></div>
+            <h2 class="text-2xl font-semibold mt-5">Coloriser</h2>
+            <p class="mt-2 text-sm text-muted leading-relaxed">Rend les couleurs d'une image en noir et blanc. U-Net entraîné en espace Lab.</p>
+            <span class="arrow inline-block mt-4 font-mono text-sm">ouvrir →</span>
+          </a>
 
-  <script>
-    // Révélation au scroll (respecte prefers-reduced-motion via CSS)
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('in'); });
-    }, { threshold: 0.15 });
-    document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
-  </script>
+          <div class="glass off rounded-2xl p-6">
+            <div class="flex items-center justify-between font-mono text-[11px] tracking-widest">
+              <span class="text-muted">03 · DENOISE</span>
+              <span class="text-muted">○ à venir</span>
+            </div>
+            <div class="mt-5 h-28 w-full rounded-xl bg-white/5 border border-white/10"></div>
+            <h2 class="text-2xl font-semibold mt-5">Débruiter</h2>
+            <p class="mt-2 text-sm text-muted leading-relaxed">Reconstruit une image altérée et supprime le bruit.</p>
+            <span class="inline-block mt-4 font-mono text-sm text-muted">indisponible</span>
+          </div>
+
+          <div class="glass off rounded-2xl p-6">
+            <div class="flex items-center justify-between font-mono text-[11px] tracking-widest">
+              <span class="text-muted">04 · GENERATE</span>
+              <span class="text-muted">○ à venir</span>
+            </div>
+            <div class="mt-5 h-28 w-full rounded-xl bg-white/5 border border-white/10"></div>
+            <h2 class="text-2xl font-semibold mt-5">Générer</h2>
+            <p class="mt-2 text-sm text-muted leading-relaxed">Crée des images depuis l'espace latent. Autoencodeurs et VAE.</p>
+            <span class="inline-block mt-4 font-mono text-sm text-muted">indisponible</span>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <footer class="max-w-5xl w-full mx-auto px-6 h-16 flex items-center justify-between font-mono text-[11px] text-muted tracking-widest border-t border-white/5">
+      <span>PROJET L3 · 2026</span><span>KERAS · JAX · FASTAPI</span>
+    </footer>
+  </div>
 </body>
 </html>

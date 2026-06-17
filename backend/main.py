@@ -4,7 +4,7 @@ Lancement en dev :
     uv run uvicorn backend.main:app --reload
 """
 
-from backend.core import config
+from backend.core import config  # force KERAS_BACKEND avant tout
 
 from pathlib import Path
 
@@ -18,13 +18,18 @@ from backend.routers import colorizer
 
 FRONTEND_DIR = Path(__file__).resolve().parents[1] / "frontend"
 
-app = FastAPI()
+app = FastAPI(
+    title="IA Créative — API",
+    description="Classer, coloriser et générer des images (Keras 3 + JAX)",
+    version="0.1.0",
+)
 
-# Sert les fichiers statiques (css, js, images) si le dossier existe
-_static = FRONTEND_DIR / "static"
-if _static.exists():
-    app.mount("/static", StaticFiles(directory=_static), name="static")
+# Sert les fichiers statiques (css, js, images).
+# Chemin absolu dérivé de l'emplacement du fichier : fonctionne quel que soit
+# le répertoire depuis lequel uvicorn est lancé.
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR / "static"), name="static")
 
+# CORS ouvert en dev (à restreindre en prod)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,8 +42,14 @@ app.include_router(colorizer.router)
 
 @app.get("/")
 def root():
-    """Sert la page d'accueil."""
+    """Page de sélection des outils."""
     return FileResponse(FRONTEND_DIR / "templates" / "index.html")
+
+
+@app.get("/colorizer")
+def colorizer_page():
+    """Page de l'outil de colorisation."""
+    return FileResponse(FRONTEND_DIR / "templates" / "colorizer.html")
 
 
 @app.get("/health")
