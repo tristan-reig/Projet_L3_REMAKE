@@ -1,4 +1,8 @@
-"""Architecture U-Net pour la colorisation (espace Lab, canal L -> canaux ab)."""
+"""Architecture U-Net pour la colorisation (espace Lab, canal L -> canaux ab).
+
+Module d'architecture pur : aucune dépendance au dataset, à matplotlib ou à la CLI.
+Importé aussi bien par le notebook d'entraînement que par le backend (au chargement).
+"""
 
 import os
 
@@ -6,9 +10,11 @@ os.environ.setdefault("KERAS_BACKEND", "jax")
 
 import keras
 from keras import layers, models
+from typing import cast
 
 IMG_SIZE = 128
 FILTERS = (64, 128, 256, 512)
+
 
 def colorization_loss(y_true, y_pred):
     """Coût de colorisation sur les canaux ab.
@@ -46,7 +52,10 @@ def _attention_block(x, name: str = ""):
 
 
 def build_unet(img_size: int = IMG_SIZE, filters: tuple = FILTERS) -> models.Model:
-    """Construit le modèle U-Net.
+    """Construit le U-Net (non compilé).
+
+    La compilation (optimiseur, LR schedule) est faite côté entraînement,
+    car elle dépend du nombre d'époques et de la taille du dataset.
     """
     inp = layers.Input(shape=(img_size, img_size, 1), name="L_input")
     skips = []
@@ -67,3 +76,32 @@ def build_unet(img_size: int = IMG_SIZE, filters: tuple = FILTERS) -> models.Mod
 
     out = layers.Conv2D(2, 1, activation="tanh", name="ab_output")(x)
     return models.Model(inp, out, name="UNet_Colorizer")
+
+
+def compile_model(
+    model: models.Model,
+    train_size: int,
+    batch_size: int,
+    epochs: int,
+    initial_lr: float = 3e-4,
+) -> models.Model:
+    """Compile le modèle avec Adam + décroissance cosinus du learning rate.
+
+    Le schedule dépend du nombre total de pas (train_size / batch * epochs),
+    d'où le besoin de ces paramètres au moment de la compilation.
+    """
+    total_steps = (train_size // batch_size) * epochs
+    lr_schedule = keras.optimizers.schedules.CosineDecay(
+        initial_learning_rate=initial_lr,
+        decay_steps=total_steps,
+        alpha=1e-6,
+    )
+
+    dummy_lr = cast(float, lr_schedule)
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=dummy_lr),
+        loss=colorization_loss,
+        metrics=["mae"],
+    )
+    return model
