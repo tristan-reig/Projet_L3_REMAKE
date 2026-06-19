@@ -1,15 +1,22 @@
 """Chargement paresseux (lazy) et mise en cache des modèles Keras.
 
 Les modèles ne sont chargés en mémoire qu'au premier appel, puis réutilisés.
+Cela évite de tout charger au démarrage et accélère le lancement de l'API.
 """
 
 from backend.core import config
 
 import keras
-from typing import cast
 
 _CACHE: dict[str, keras.Model] = {}
 
+def _custom_objects(name: str) -> dict:
+    """Objets custom nécessaires au chargement de certains modèles."""
+    if name == "colorizer":
+        from ml.colorizer.model import colorization_loss
+
+        return {"colorization_loss": colorization_loss}
+    return {}
 
 def get_model(name: str) -> keras.Model:
     """Retourne le modèle demandé, en le chargeant une seule fois."""
@@ -22,10 +29,9 @@ def get_model(name: str) -> keras.Model:
             raise FileNotFoundError(
                 f"Fichier modèle introuvable : {path}. "
             )
-        _CACHE[name] = cast(keras.Model, keras.models.load_model(path))
+        _CACHE[name] = keras.models.load_model(path, custom_objects=_custom_objects(name))
 
     return _CACHE[name]
-
 
 def available_models() -> list[str]:
     """Liste les modèles dont le fichier .keras est réellement présent."""
