@@ -1,62 +1,83 @@
-"""Pipeline de données STL-10 pour l'entraînement du coloriseur."""
+"""Pipeline de données Imagenette pour l'entraînement du classifieur.
 
+Charge Imagenette directement depuis sa source (tarball d'images organisées en
+dossiers par classe), SANS tensorflow_datasets — ce qui évite le conflit Protobuf
+récurrent de tfds sur Colab. On s'appuie sur keras.utils.image_dataset_from_directory.
+"""
+
+import os
+
+os.environ.setdefault("KERAS_BACKEND", "jax")
+
+import keras
 import tensorflow as tf
-import tensorflow_datasets as tfds
 
-IMG_SIZE = 128
-BATCH_SIZE = 128
-TRAIN_SIZE = 90000
+IMG_SIZE = 160
+BATCH_SIZE = 64
 
-def _process_image(features):
-    """RGB -> Lab normalisé (L dans [-1,1], ab dans [-1,1] après /128)."""
-    img = tf.image.resize(features["image"], [IMG_SIZE, IMG_SIZE]) / 255.0
+DATASET_URL = "https://s3.amazonaws.com/fast-ai-imageclas/imagenette2-320.tgz"
 
-    mask_rgb = img > 0.04045
-    img_lin = tf.where(mask_rgb, tf.pow((img + 0.055) / 1.055, 2.4), img / 12.92)
+SYNSET_TO_NAME = {
+    "n01440764": "tanche",
+    "n02102040": "springer anglais",
+    "n02979186": "lecteur cassette",
+    "n03000684": "tronçonneuse",
+    "n03028079": "église",
+    "n03394916": "cor d'harmonie",
+    "n03417042": "camion poubelle",
+    "n03425413": "pompe à essence",
+    "n03445777": "balle de golf",
+    "n03888257": "parachute",
+}
 
-    mat = tf.constant(
-        [[0.412453, 0.212671, 0.019334],
-         [0.357580, 0.715160, 0.119193],
-         [0.180423, 0.072169, 0.950227]],
-        dtype=tf.float32,
+
+def download_imagenette() -> str:
+    """Télécharge et décompresse Imagenette, renvoie le chemin du dossier racine."""
+    path = keras.utils.get_file(origin=DATASET_URL, extract=True)
+    base = os.path.join(os.path.dirname(path), "imagenette2-320")
+    if not os.path.isdir(base):
+        for root, dirs, _ in os.walk(os.path.dirname(path)):
+            if "train" in dirs and "val" in dirs:
+                base = root
+                break
+    return base
+
+
+def _augment(image, label):
+    """Augmentation légère (flip, luminosité, contraste)"""
+    image = tf.image.random_flip_left_right(image)
+    image = tf.image.random_brightness(image, 0.15)
+    image = tf.image.random_contrast(image, 0.85, 1.15)
+    image = tf.clip_by_value(image, 0.0, 255.0)
+    return image, label
+
+
+def build_dataset(batch_size: int = BATCH_SIZE):
+    """Retourne (train_ds, val_ds, class_names) prêts pour model.fit()."""
+    base = download_imagenette()
+    train_dir = os.path.join(base, "train")
+    val_dir = os.path.join(base, "val")
+
+    train_ds = keras.utils.image_dataset_from_directory(
+        train_dir,
+        image_size=(IMG_SIZE, IMG_SIZE),
+        batch_size=batch_size,
+        label_mode="int",
+        shuffle=True,
     )
-    xyz = tf.linalg.matmul(img_lin, mat)
-    xyz_norm = xyz / tf.constant([0.950456, 1.0, 1.088754], dtype=tf.float32)
+    val_ds = keras.utils.image_dataset_from_directory(
+        val_dir,
+        image_size=(IMG_SIZE, IMG_SIZE),
+        batch_size=batch_size,
+        label_mode="int",
+        shuffle=False,
+    )
 
-    mask_xyz = xyz_norm > 0.008856
-    f_xyz = tf.where(mask_xyz, tf.pow(xyz_norm, 1.0 / 3.0), (7.787 * xyz_norm) + (16.0 / 116.0))
+    # Noms lisibles dans l'ordre des dossiers (= ordre des labels).
+    synsets = train_ds.class_names
+    class_names = [SYNSET_TO_NAME.get(s, s) for s in synsets]
 
-    x, y, z = tf.unstack(f_xyz, axis=-1)
-    L = (116.0 * y) - 16.0
-    a = 500.0 * (x - y)
-    b = 200.0 * (y - z)
+    train_ds = train_ds.map(_augment, num_parallel_calls=tf.data.AUTOTUNE).prefetch(tf.data.AUTOTUNE)
+    val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
 
-    L_norm = tf.expand_dims(L / 50.0 - 1.0, axis=-1)
-    ab_norm = tf.stack([a, b], axis=-1) / 128.0
-    return L_norm, ab_norm
-
-
-def _augment(l, ab):
-    """Flip horizontal synchronisé + léger bruit gaussien."""
-    seed = tf.random.uniform(shape=(), minval=0, maxval=2**31 - 1, dtype=tf.int32)
-    l = tf.image.stateless_random_flip_left_right(l, seed=(seed, 0))
-    ab = tf.image.stateless_random_flip_left_right(ab, seed=(seed, 0))
-
-    ab = tf.clip_by_value(ab + tf.random.normal(tf.shape(ab), stddev=0.02), -1.0, 1.0)
-    l = tf.image.random_brightness(l, 0.15)
-    l = tf.clip_by_value(l + tf.random.normal(tf.shape(l), stddev=0.02), -1.0, 1.0)
-    return l, ab
-
-
-def build_dataset(batch_size: int = BATCH_SIZE, train_size: int = TRAIN_SIZE):
-    """Retourne (train_ds, val_ds) prêts pour model.fit()."""
-    ds = tfds.load("stl10", split="unlabelled", as_supervised=False)
-    ds = ds.map(_process_image, num_parallel_calls=tf.data.AUTOTUNE)
-    ds = ds.shuffle(10000, reshuffle_each_iteration=False)
-
-    train_ds = ds.take(train_size).shuffle(5000, reshuffle_each_iteration=True)
-    train_ds = train_ds.map(_augment, num_parallel_calls=tf.data.AUTOTUNE)
-    train_ds = train_ds.batch(batch_size).prefetch(tf.data.AUTOTUNE)
-
-    val_ds = ds.skip(train_size).batch(batch_size).prefetch(tf.data.AUTOTUNE)
-    return train_ds, val_ds
+    return train_ds, val_ds, class_names
