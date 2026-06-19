@@ -11,7 +11,7 @@ MODELS_DIR = ROOT_DIR / "models"
 
 # Chemins des modèles entraînés
 MODEL_PATHS = {
-    # "classifier": MODELS_DIR / "model_classifier.keras",
+    "classifier": MODELS_DIR / "model_classifier.keras",
     "colorizer": MODELS_DIR / "model_colorizer.keras",
     # "generator": MODELS_DIR / "model_vae.keras",  # à venir
 }

@@ -4,7 +4,7 @@ Lancement en dev :
     uv run uvicorn backend.main:app --reload
 """
 
-from backend.core import config  # force KERAS_BACKEND avant tout
+from backend.core import config
 
 from pathlib import Path
 
@@ -14,15 +14,11 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from backend.core import model_loader
-from backend.routers import colorizer
+from backend.routers import classifier, colorizer
 
 FRONTEND_DIR = Path(__file__).resolve().parents[1] / "frontend"
 
-app = FastAPI(
-    title="IA Créative — API",
-    description="Classer, coloriser et générer des images (Keras 3 + JAX)",
-    version="0.1.0",
-)
+app = FastAPI()
 
 # Sert les fichiers statiques (css, js, images).
 # Chemin absolu dérivé de l'emplacement du fichier : fonctionne quel que soit
@@ -37,14 +33,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(classifier.router)
 app.include_router(colorizer.router)
-
 
 @app.get("/")
 def root():
     """Page de sélection des outils."""
     return FileResponse(FRONTEND_DIR / "templates" / "index.html")
 
+@app.get("/classifier")
+def classifier_page():
+    """Page de l'outil de classification."""
+    return FileResponse(FRONTEND_DIR / "templates" / "classifier.html")
 
 @app.get("/colorizer")
 def colorizer_page():
