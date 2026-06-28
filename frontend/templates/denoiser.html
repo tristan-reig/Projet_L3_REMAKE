@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Débruiter — Refonte Projet L3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/theme.css" />
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        fontFamily: {
+          sans: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+          mono: ['"Space Mono"', 'monospace'],
+        },
+        colors: { night: '#070912', ink: '#0d1020', fg: '#eef0fb', muted: '#8b90b5' },
+      } },
+    };
+  </script>
+</head>
+<body class="text-fg font-sans antialiased min-h-screen flex flex-col relative">
+
+  <div class="mesh" aria-hidden="true">
+    <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  </div>
+
+  <div class="relative z-10 flex flex-col min-h-screen">
+    <div class="max-w-4xl w-full mx-auto px-6 pt-8">
+      <a href="/" class="font-mono text-sm text-muted hover:text-fg transition">← retour</a>
+    </div>
+
+    <main class="max-w-4xl w-full mx-auto px-6 flex-1 w-full">
+      <section class="pt-8 pb-10">
+        <h1 class="font-semibold text-4xl md:text-5xl tracking-tight">Débruiter une image</h1>
+        <p class="mt-5 max-w-lg text-muted leading-relaxed">
+          Dépose une image. Le modèle restaure une image dégradée : il retire le bruit
+          (gaussien, sel & poivre, flou…) et reconstruit les détails.
+        </p>
+      </section>
+
+      <section class="pb-20">
+        <div id="dropzone" tabindex="0" role="button" aria-label="Choisir une image à coloriser"
+             class="glass dropzone rounded-2xl border-dashed p-12 text-center cursor-pointer">
+          <input id="fileInput" type="file" accept="image/*" class="hidden" />
+          <div class="text-3xl text-muted mb-3">+</div>
+          <p class="text-sm">Glisse une image, ou <span class="underline decoration-indigo-400">clique pour choisir</span></p>
+          <p class="mt-2 font-mono text-[11px] text-muted tracking-widest">JPG / PNG · traité en 128×128 puis rééchantillonné</p>
+        </div>
+
+        <div id="error" class="hidden mt-4 text-sm text-rose-300 border border-rose-400/30 bg-rose-500/10 rounded-xl px-4 py-3"></div>
+
+        <div id="loading" class="hidden mt-12 flex flex-col items-center gap-3">
+          <div class="spinner w-8 h-8 border-2 border-white/15 border-t-indigo-300 rounded-full"></div>
+          <p class="font-mono text-xs text-muted tracking-widest">COLORISATION…</p>
+        </div>
+
+        <div id="result" class="hidden mt-10 fade">
+          <div class="grid md:grid-cols-2 gap-4">
+            <figure class="glass rounded-2xl overflow-hidden">
+              <figcaption class="font-mono text-[11px] text-muted tracking-widest px-4 py-3 border-b border-white/10">AVANT · ENTRÉE</figcaption>
+              <img id="imgBefore" class="w-full object-contain max-h-[420px]" alt="Image originale" />
+            </figure>
+            <figure class="glass rounded-2xl overflow-hidden">
+              <figcaption class="font-mono text-[11px] text-muted tracking-widest px-4 py-3 border-b border-white/10">APRÈS · DÉBRUITÉ</figcaption>
+              <img id="imgAfter" class="w-full object-contain max-h-[420px]" alt="Image colorisée" />
+            </figure>
+          </div>
+          <div class="mt-6 flex flex-wrap gap-3 text-sm">
+            <a id="downloadBtn" download="debruite.png" class="px-5 py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-white hover:opacity-90 transition">↓ télécharger</a>
+            <button id="resetBtn" class="px-5 py-2.5 rounded-full glass hover:border-white/25 transition">↺ autre image</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="max-w-4xl w-full mx-auto px-6 h-16 flex items-center font-mono text-[11px] text-muted tracking-widest border-t border-white/5">
+      KERAS · JAX · FASTAPI
+    </footer>
+  </div>
+
+  <script src="/static/js/denoiser.js"></script>
+</body>
+</html>
